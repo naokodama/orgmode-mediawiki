@@ -100,10 +100,10 @@ by the footnotes themselves."
 (org-export-define-derived-backend 'mw 'html
   :filters-alist '((:filter-parse-tree . org-mw-separate-elements))
   :menu-entry
-  '(?m "Export to Mediawiki"
-       ((?M "To temporary buffer"
+  '(?w "Export to Mediawiki"
+       ((?W "To temporary buffer"
             (lambda (a s v b) (org-mw-export-as-mediawiki a s v)))
-        (?m "To file" (lambda (a s v b) (org-mw-export-to-mediawiki a s v)))
+        (?w "To file" (lambda (a s v b) (org-mw-export-to-mediawiki a s v)))
         (?o "To file and open"
             (lambda (a s v b)
               (if a (org-mw-export-to-mediawiki t s v)
@@ -121,7 +121,7 @@ by the footnotes themselves."
                      (horizontal-rule . org-mw-horizontal-rule)
                      (inline-src-block . org-mw-code)
                      (italic . org-mw-italic)
-                     (item . org-mw-item)
+                     (item . org-html-item)
                      (line-break . org-mw-line-break)
                      (link . org-mw-link)
                      (paragraph . org-mw-paragraph)
@@ -130,7 +130,7 @@ by the footnotes themselves."
                      (quote-block . org-mw-quote-block)
                      (quote-section . org-mw-example-block)
                      (section . org-mw-section)
-                     (src-block . org-mw-example-block)
+                     (src-block . org-mw-src-block)
                      (inner-template . org-mw-inner-template)
                      (template . org-mw-template)
                      (verbatim . org-mw-verbatim)
@@ -279,6 +279,18 @@ channel."
    (org-remove-indentation
     (org-element-property :value example-block))))
 
+;;;; Src Block
+
+(defun org-mw-src-block (src-block contents info)
+  "Transcode EXAMPLE-BLOCK element into Mediawiki format.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (let* (
+         (lang (org-element-property :language src-block))
+         (code (org-element-property :value src-block)))
+    (concat ("<syntaxhighlight lang=\"" lang
+             value "</syntaxhighlight>")))
+  )
 
 ;;;; Headline
 
@@ -381,7 +393,7 @@ a communication channel."
         (type (org-element-property :type link)))
     (cond ((member type '("custom-id" "id"))
            (let ((destination (org-export-resolve-id-link link info)))
-             (if (stringp destination)	; External file.
+             (if (stringp destination)  ; External file.
                  (let ((path (funcall --link-org-files-as-html-maybe
                                       destination info)))
                    (if (not contents) (format "<%s>" path)
@@ -475,7 +487,7 @@ contextual information."
   ;; Protect ambiguous !
   (setq text (replace-regexp-in-string "\\(!\\)\\[" "\\\\!" text nil nil 1))
   ;; Protect `, *, _ and \
-  (setq text (replace-regexp-in-string "[`*_\\]" "\\\\\\&" text))
+  (setq text (replace-regexp-in-string "[`*\\]" "\\\\\\&" text))
   ;; Handle special strings, if required.
   (when (plist-get info :with-special-strings)
     (setq text (org-html-convert-special-strings text)))
@@ -694,7 +706,7 @@ Return output file's name."
   (let ((outfile (org-export-output-file-name
                   org-mw-filename-extension subtreep)))
     (if async
- (org-export-async-start
+        (org-export-async-start
             (lambda (f) (org-export-add-to-stack f 'mw))
           `(expand-file-name
             (org-export-to-file 'mw ,outfile ,subtreep ,visible-only)))
