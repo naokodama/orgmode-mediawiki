@@ -288,8 +288,7 @@ channel."
   (let* (
          (lang (org-element-property :language src-block))
          (code (org-element-property :value src-block)))
-    (concat ("<syntaxhighlight lang=\"" lang
-             value "</syntaxhighlight>")))
+    (concat "<syntaxhighlight lang=\"" lang code "</syntaxhighlight>"))
   )
 
 ;;;; Headline
@@ -488,6 +487,7 @@ contextual information."
   (setq text (replace-regexp-in-string "\\(!\\)\\[" "\\\\!" text nil nil 1))
   ;; Protect `, *, _ and \
   (setq text (replace-regexp-in-string "[`*\\]" "\\\\\\&" text))
+  (setq text (replace-regexp-in-string "\\_" "_" text))
   ;; Handle special strings, if required.
   (when (plist-get info :with-special-strings)
     (setq text (org-html-convert-special-strings text)))
