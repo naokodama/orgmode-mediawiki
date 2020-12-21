@@ -125,7 +125,7 @@ by the footnotes themselves."
                      (line-break . org-mw-line-break)
                      (link . org-mw-link)
                      (paragraph . org-mw-paragraph)
-                     (plain-list . org-mw-plain-list)
+                     (plain-list . org-html-plain-list)
                      (plain-text . org-mw-plain-text)
                      (quote-block . org-mw-quote-block)
                      (quote-section . org-mw-example-block)
